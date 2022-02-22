@@ -1,11 +1,14 @@
 const express = require("express");
 const req = require("express/lib/request");
 const res = require("express/lib/response");
+const cookieParser = require('cookie-parser')
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser")
 
+
 app.set("view engine", "ejs");
+app.use(cookieParser())
 
 
 const urlDatabase = {
@@ -28,13 +31,19 @@ app.use((req, res, next) => {
 //client makes a request (GET) for the information on this page.
 //We then res.RENDER the information to the user.
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = {
+    userName: req.cookies.userName
+  }
+  res.render("urls_new",templateVars);
 });
 
 //Client makes request(GET) for information
 //We RENDER our main page (urls_index) using the templateVars Object
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { 
+  urls: urlDatabase,
+  userName: req.cookies.userName,
+   };
   res.render("urls_index", templateVars);
 });
 
@@ -44,7 +53,8 @@ app.get("/urls", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { 
     shortURL: req.params.shortURL, //our shortURL is the req.param.shortURL.
-    longURL: urlDatabase[req.params.shortURL]  //get longURL value like this 
+    longURL: urlDatabase[req.params.shortURL],  //get longURL value like this 
+    userName: req.cookies.userName
   }
   res.render("urls_show", templateVars);
 });
@@ -63,7 +73,7 @@ app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
   let longURL = req.body.longURL;
   urlDatabase[shortURL] = longURL;
-  res.redirect(`/urls`);    
+  res.redirect('/urls');    
 })
 
 //CLient Makes a request to Make or Change Information (PUT)
@@ -85,6 +95,21 @@ app.post("/urls/:id/edit", (req, res) => {
   urlDatabase[id] = longURL;
   //then redirects to homepage.
   res.redirect(`/urls`)
+})
+//User enters their userName in the login input
+//sets the variable userName to the userName put at login from req.body.userName
+app.post("/urls/login", (req, res) => {
+  const userName = req.body.userName
+  //set the cookie with RES to 'userName' , userName
+  res.cookie('userName',userName);
+  //redirect to the index
+  res.redirect(`/urls`)
+})
+
+app.post("/urls/logout", (req, res) => {
+  const userName = req.body.userName;
+  res.clearCookie('userName', userName)
+  res.redirect('/urls')
 })
 
 app.listen(PORT, () => {
