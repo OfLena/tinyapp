@@ -15,11 +15,12 @@ const urlDatabase = {
 
 app.use(bodyParser.urlencoded({extended: true}));
 
-//Logs actions to our console.
-// app.use((req, res, next) => {
-//   console.log(`${req.method} ${req.url}`)
-//   next();
-// });
+// Logs actions to our console.
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`)
+  next();
+});
+
 
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
@@ -32,8 +33,8 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { 
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL]
+    shortURL: req.params.shortURL, //our shortURL is the req.param.shortURL.
+    longURL: urlDatabase[req.params.shortURL]  //get longURL value like this 
   }
   res.render("urls_show", templateVars);
 });
@@ -43,9 +44,15 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL]
+  const longURL = urlDatabase[req.params.shortURL] //again accessing longURL by the key SHortURL and value of it
   res.redirect(longURL);
 });
+
+app.post("/urls/:shortURL/delete", (req, res) => {
+  let shortURL = req.params.shortURL
+  delete urlDatabase[shortURL]
+  res.redirect('/urls');
+})
 
 app.post("/urls", (req, res) => {
   // console.log(req.body);  //Log the POST request body to the console
@@ -63,4 +70,7 @@ generateRandomString = () => {
   let shortURL = Math.random().toString(36).slice(7);
   return shortURL;
 }
+
+
+
 
