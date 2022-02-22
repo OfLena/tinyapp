@@ -15,6 +15,18 @@ const urlDatabase = {
 
 app.use(bodyParser.urlencoded({extended: true}));
 
+
+//FOllows from URLS_show on line 24
+//POST // Dynamic Variable associated with edit.
+app.post("/urls/:shortURL/edit", (req, res) => {
+  //gets short variable from req.params
+  let shortURL = req.params.shortURL;
+  const longURL = req.body.longURL;
+  urlDatabase[shortURL] = longURL;
+  //then redirects to homepage.
+  res.redirect(`/urls`)
+})
+
 // Logs actions to our console.
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`)
@@ -59,7 +71,7 @@ app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
   let longURL = req.body.longURL;
   urlDatabase[shortURL] = longURL;
-  res.redirect(`/urls/${shortURL}`);    
+  res.redirect(`/urls`);    
 })
 
 app.listen(PORT, () => {
