@@ -64,6 +64,15 @@ app.get("/urls/register", (req, res) => {
     res.render("urls_register", templateVars)
   })
 
+  //LOGIN PAGE
+  app.get("/urls/login", (req, res) => {
+    const templateVars = {
+      urls: urlDatabase,
+      user_id: req.cookies.user_id
+    }
+    res.render("urls_login", templateVars)
+  })
+
 //Client makes request (GET) for information using the variable ":shortURL"
 //We access the templateVars Object to set the KEY - VALUE pairs.
 //Then RENDER the urls_show page
