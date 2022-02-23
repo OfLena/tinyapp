@@ -126,7 +126,9 @@ app.post("/urls/:id/edit", (req, res) => {
 //Client makes a request to Make/Change (POST) information on the register page
 app.post("/urls/register", (req, res) => {
 
-  checkEmailExists(req.body.email, users, res);
+  if (checkEmailExists(req.body.email, users, res) === true) {
+    res.send('Error: Email address already exists')
+  } else {
 
   let userRandomID = generateRandomString();
   let id = userRandomID
@@ -141,10 +143,10 @@ app.post("/urls/register", (req, res) => {
   if (email === '' || password === '') {
     res.send('400 Status Code - Email and/or Password Cannot be Empty')
   }
-
+  
   res.cookie('user_id',users[userRandomID])
   res.redirect('/urls')
-})
+}})
 
 
 //User enters their userName in the login input
@@ -177,8 +179,8 @@ checkEmailExists = (newEmail, database, res) => {
 for (const i in database) {
   // console.log("USER --->", database[i].email)
   if (newEmail === database[i].email) {
-  res.send('Error: Email address already exists')
+    return true;
   }
 }
-return newEmail
+return false;
 }
