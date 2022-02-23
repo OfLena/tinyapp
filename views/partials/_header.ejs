@@ -10,26 +10,28 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+        <a class="nav-item nav-link" href="/urls/register">Registration Page</a>
       </div>
       </div>
       <div style="align-items: flex-end;">
       <div>
-        <% if(userName){ %>
+        <% if(user_id){ %>
         <form action="/urls/logout" method="POST">
           <div>
-            <h6>User:<%= userName %></h6>
+            <h6>User:<%= user_id.email %></h6>
           <button type="submit" class="btn btn-primary">Logout</button>
         </div>
           </form>
           </div>
       <% } else { %>
-        
+        <!--
       <form action="/urls/login" method="POST">
         <div>
           <input type="text" name="userName" placeholder="userName" style="width: 300px; margin: 1em">
           <button type="submit" class="btn btn-primary">Login</button>
         </div>
       </form>
+      --->
       </div>
     
       

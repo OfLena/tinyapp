@@ -16,13 +16,7 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
-const users = { 
-  userRandomID: {
-    id: "userRandomID", 
-    email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
-  }
-}
+const users = {};
 
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -40,8 +34,10 @@ app.use((req, res, next) => {
 //We then res.RENDER the information to the user.
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    userName: req.cookies.userName
+    // userName: req.cookies.userName
+    user_id: req.cookies.user_id
   }
+ 
   res.render("urls_new",templateVars);
 });
 
@@ -50,7 +46,8 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = { 
   urls: urlDatabase,
-  userName: req.cookies.userName,
+  // userName: req.cookies.userName,
+  user_id: req.cookies.user_id
    };
   res.render("urls_index", templateVars);
 });
@@ -61,7 +58,8 @@ app.get("/urls", (req, res) => {
 app.get("/urls/register", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
-    userName: req.cookies.userName
+    // userName: req.cookies.userName
+    user_id: req.cookies.user_id
   }
     res.render("urls_register", templateVars)
   })
@@ -73,7 +71,8 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { 
     shortURL: req.params.shortURL, //our shortURL is the req.param.shortURL.
     longURL: urlDatabase[req.params.shortURL],  //get longURL value like this 
-    userName: req.cookies.userName
+    // userName: req.cookies.userName
+    user_id: req.cookies.user_id
   }
   res.render("urls_show", templateVars);
 });
@@ -133,9 +132,8 @@ app.post("/urls/register", (req, res) => {
     email,
     password,
   }
-
-  console.log(users)
-  res.cookie('user_id',userRandomID)
+  
+  res.cookie('user_id',users[userRandomID])
   res.redirect('/urls')
 })
 
@@ -145,14 +143,15 @@ app.post("/urls/register", (req, res) => {
 app.post("/urls/login", (req, res) => {
   const userName = req.body.userName
   //set the cookie with RES to 'userName' , userName
-  res.cookie('userName',userName);
+  // res.cookie('userName', userName)
   //redirect to the index
   res.redirect(`/urls`)
 })
 
 app.post("/urls/logout", (req, res) => {
   const userName = req.body.userName;
-  res.clearCookie('userName', userName)
+  // res.clearCookie('userName', userName)
+  res.clearCookie('user_id')
   res.redirect('/urls')
 })
 
