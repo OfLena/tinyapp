@@ -4,7 +4,8 @@ const res = require("express/lib/response");
 const cookieParser = require('cookie-parser')
 const app = express();
 const PORT = 8080; // default port 8080
-const bodyParser = require("body-parser")
+const bodyParser = require("body-parser");
+const e = require("express");
 
 
 app.set("view engine", "ejs");
@@ -35,7 +36,11 @@ app.use((req, res, next) => {
 app.get("/urls/new", (req, res) => {
   const templateVars = {
     // userName: req.cookies.userName
-    user_id: req.cookies.user_id
+    user_id: req.cookies.user_id,
+    email:
+    users[req.cookies["user_id"]]
+      ? users[req.cookies["user_id"]].email
+      : null
   }
  
   res.render("urls_new",templateVars);
@@ -47,7 +52,11 @@ app.get("/urls", (req, res) => {
   const templateVars = { 
   urls: urlDatabase,
   // userName: req.cookies.userName,
-  user_id: req.cookies.user_id
+  user_id: req.cookies.user_id,
+  email:
+  users[req.cookies["user_id"]]
+    ? users[req.cookies["user_id"]].email
+    : null
    };
   res.render("urls_index", templateVars);
 });
@@ -59,7 +68,11 @@ app.get("/urls/register", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
     // userName: req.cookies.userName
-    user_id: req.cookies.user_id
+    user_id: req.cookies.user_id,
+    email:
+    users[req.cookies["user_id"]]
+      ? users[req.cookies["user_id"]].email
+      : null
   }
     res.render("urls_register", templateVars)
   })
@@ -68,7 +81,11 @@ app.get("/urls/register", (req, res) => {
   app.get("/urls/login", (req, res) => {
     const templateVars = {
       urls: urlDatabase,
-      user_id: req.cookies.user_id
+      user_id: req.cookies.user_id,
+      email:
+      users[req.cookies["user_id"]]
+        ? users[req.cookies["user_id"]].email
+        : null
     }
     res.render("urls_login", templateVars)
   })
@@ -81,7 +98,11 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: req.params.shortURL, //our shortURL is the req.param.shortURL.
     longURL: urlDatabase[req.params.shortURL],  //get longURL value like this 
     // userName: req.cookies.userName
-    user_id: req.cookies.user_id
+    user_id: req.cookies.user_id,
+    email:
+    users[req.cookies["user_id"]]
+      ? users[req.cookies["user_id"]].email
+      : null
   }
   res.render("urls_show", templateVars);
 });
@@ -135,37 +156,40 @@ app.post("/urls/:id/edit", (req, res) => {
 //Client makes a request to Make/Change (POST) information on the register page
 app.post("/urls/register", (req, res) => {
 
-  if (checkEmailExists(req.body.email, users, res) === true) {
+  if (checkEmailExists(req.body.email, users, res)) {
     res.send('Error: Email address already exists')
   } else {
 
-  let userRandomID = generateRandomString();
-  let id = userRandomID
+  let id = generateRandomString();
   let email = req.body.email
   let password = req.body.password
-  users[userRandomID] = {
+  users[id] = {
     id,
     email,
     password,
   }
-
   if (email === '' || password === '') {
     res.send('400 Status Code - Email and/or Password Cannot be Empty')
   }
-  
-  res.cookie('user_id',users[userRandomID])
+}
+
+
+  res.cookie('user_id', checkEmailExists(req.body.email, users, res).id)
   res.redirect('/urls')
-}})
+});
+
 
 
 //User enters their userName in the login input
 //sets the variable userName to the userName put at login from req.body.userName
 app.post("/urls/login", (req, res) => {
-  const userName = req.body.userName
-  //set the cookie with RES to 'userName' , userName
-  // res.cookie('userName', userName)
-  //redirect to the index
-  res.redirect(`/urls`)
+  if (checkEmailExists(req.body.email, users, res)  &&  
+      checkPasswordCorrect(req.body.password, users, res)) {
+        res.cookie('user_id', checkEmailExists(req.body.email, users, res).id)
+        res.redirect(`/urls`)
+   } else {
+   res.send('403 Status Code: Password or Email Address Incorrect')
+   }
 })
 
 app.post("/urls/logout", (req, res) => {
@@ -184,12 +208,26 @@ generateRandomString = () => {
   return shortURL;
 }
 
-checkEmailExists = (newEmail, database, res) => {
+const checkEmailExists = (newEmail, database, res) => {
+  if (newEmail === ''){
+    res.send('Error: Email Can not be Empty')
+  }
 for (const i in database) {
-  // console.log("USER --->", database[i].email)
   if (newEmail === database[i].email) {
-    return true;
+    return database[i]
   }
 }
 return false;
+}
+
+const checkPasswordCorrect = (checkPassword, database, res) => {
+  if (checkPassword === ''){
+    res.send('Error: Password Cannot be Empty')
+  }
+  for (const i in database) {
+    if (checkPassword === database[i].password) {
+      return database[i];
+    }
+  }
+  return false;
 }
