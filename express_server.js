@@ -16,16 +16,11 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
-const users = {
+const users = { 
   userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dishwasher"
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user@example.com",
-    passwprd: "purple-monkey-dinosaur"
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
   }
 }
 
@@ -128,13 +123,21 @@ app.post("/urls/:id/edit", (req, res) => {
 })
 
 //Client makes a request to Make/Change (POST) information on the register page
-// app.post("/urls/register", (req, res) => {
-//   let userRandomID = generateRandomString();
-//   userRandomID[id] = userRandomID;
-//   userRandomID[email] = 
-//   res.cookie('email', )
-//   res.redirect('/urls')
-// })
+app.post("/urls/register", (req, res) => {
+  let userRandomID = generateRandomString();
+  let id = userRandomID
+  let email = req.body.email
+  let password = req.body.password
+  users[userRandomID] = {
+    id,
+    email,
+    password,
+  }
+
+  console.log(users)
+  res.cookie('user_id',userRandomID)
+  res.redirect('/urls')
+})
 
 
 //User enters their userName in the login input
