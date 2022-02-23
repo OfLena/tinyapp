@@ -157,7 +157,7 @@ app.post("/urls/:id/edit", (req, res) => {
 app.post("/urls/register", (req, res) => {
 
   if (checkEmailExists(req.body.email, users, res)) {
-    res.send('Error: Email address already exists')
+    res.send('403 Status Code: Email address already exists')
   } else {
 
   let id = generateRandomString();
@@ -193,7 +193,6 @@ app.post("/urls/login", (req, res) => {
 })
 
 app.post("/urls/logout", (req, res) => {
-  const userName = req.body.userName;
   // res.clearCookie('userName', userName)
   res.clearCookie('user_id')
   res.redirect('/urls')
@@ -210,7 +209,7 @@ generateRandomString = () => {
 
 const checkEmailExists = (newEmail, database, res) => {
   if (newEmail === ''){
-    res.send('Error: Email Can not be Empty')
+    res.send('Status Code 400: Email Can not be Empty')
   }
 for (const i in database) {
   if (newEmail === database[i].email) {
@@ -222,7 +221,7 @@ return false;
 
 const checkPasswordCorrect = (checkPassword, database, res) => {
   if (checkPassword === ''){
-    res.send('Error: Password Cannot be Empty')
+    res.send('Status Code 400: Password Cannot be Empty')
   }
   for (const i in database) {
     if (checkPassword === database[i].password) {
