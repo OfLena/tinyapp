@@ -14,7 +14,20 @@ app.use(cookieParser())
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
-}; 
+};
+
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dishwasher"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user@example.com",
+    passwprd: "purple-monkey-dinosaur"
+  }
+}
 
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -47,6 +60,17 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+//REGISTRATION PAGE
+//Client asks for information (GET), the registration page,
+//We render the register page
+app.get("/urls/register", (req, res) => {
+  const templateVars = {
+    urls: urlDatabase,
+    userName: req.cookies.userName
+  }
+    res.render("urls_register", templateVars)
+  })
+
 //Client makes request (GET) for information using the variable ":shortURL"
 //We access the templateVars Object to set the KEY - VALUE pairs.
 //Then RENDER the urls_show page
@@ -66,6 +90,12 @@ app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL] //again accessing longURL by the key SHortURL and value of it
   res.redirect(longURL);
 });
+
+
+//////// ********************************************** //////////////
+////////////////////////// POST ROUTES ///////////////////////////////
+//////// ********************************************** //////////////
+
 
 //Client makes a request to Make/Change Information
 app.post("/urls", (req, res) => {
@@ -96,6 +126,17 @@ app.post("/urls/:id/edit", (req, res) => {
   //then redirects to homepage.
   res.redirect(`/urls`)
 })
+
+//Client makes a request to Make/Change (POST) information on the register page
+// app.post("/urls/register", (req, res) => {
+//   let userRandomID = generateRandomString();
+//   userRandomID[id] = userRandomID;
+//   userRandomID[email] = 
+//   res.cookie('email', )
+//   res.redirect('/urls')
+// })
+
+
 //User enters their userName in the login input
 //sets the variable userName to the userName put at login from req.body.userName
 app.post("/urls/login", (req, res) => {
