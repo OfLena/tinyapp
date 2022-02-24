@@ -21,7 +21,7 @@
     <div class="card-body">
       <h5 class="card-title">EDIT</h5>
 <!--Changes information, Action is the dynamic variable, POST is changing the information-->
-      <form action="/urls/<%= shortURL %>/edit" method="POST">
+      <form action="/urls/<%= shortURL %>" method="POST">
           <h7>Enter URL</h7>
           <input class="center" name="longURL" type="text" placeholder="http://" style="width: 300px; margin: 1em">
           <button type="submit" class="btn btn-primary">Submit</button>

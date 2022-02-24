@@ -5,7 +5,8 @@ const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
-const e = require("express");
+const bcrypt = require('bcryptjs');
+
 
 
 app.set("view engine", "ejs");
@@ -59,9 +60,14 @@ app.get("/urls/new", (req, res) => {
 //Client makes request(GET) for information
 //We RENDER our main page (urls_index) using the templateVars Object
 app.get("/urls", (req, res) => {
+  console.log(urlDatabase)
+  if (req.cookies.user_id === null || req.cookies.user_id === undefined){
+    return res.redirect('/urls/register')
+  }
+const checkUserID = urlsForUser(req.cookies.user_id, urlDatabase)
+// console.log(checkUserID)
   const templateVars = {
-    urls: urlDatabase,
-
+    urls: checkUserID,
     user_id: req.cookies.user_id,
     email:
   users[req.cookies["user_id"]]
@@ -69,7 +75,7 @@ app.get("/urls", (req, res) => {
     : null
   };
 
-  console.log('TemplateVars --->', templateVars)
+  // console.log('TemplateVars --->', templateVars)
 
   res.render("urls_index", templateVars);
 });
@@ -128,7 +134,7 @@ app.get("/u/:shortURL", (req, res) => {
   
   let longURL = urlDatabase[req.params.shortURL].longURL; //again accessing longURL by the key SHortURL and value of it
   
-  console.log('longURL --->', longURL)
+  // console.log('longURL --->', longURL)
   res.redirect(longURL);
 });
 
@@ -155,12 +161,12 @@ app.post("/urls", (req, res) => {
     //Do the same from our cookies for the userID
    urlDatabase[shortURL] = {
         'longURL' : longURL,
-       'UserID'  : user_id,
+       'userID'  : user_id,
     },
     
     //Console logs to prove our DB is populating properly.
-    console.log('URLdatabase: -->', urlDatabase)
-    console.log('Body --->', req.body)
+    // console.log('URLdatabase: -->', urlDatabase)
+    // console.log('Body --->', req.body)
 
     
     // let shortURL = generateRandomString();
@@ -176,37 +182,6 @@ app.post("/urls", (req, res) => {
     res.send("YOU SHALL NOT PASS!");
   }
 });
-
-//CLient Makes a request to Make or Change Information (PUT)
-app.post("/urls/:shortURL/delete", (req, res) => {
-  //set the variable to the req.params.shorturl
-  let shortURL = req.params.shortURL;
-  //delete the ShortURL from the urlDatabase
-  delete urlDatabase[shortURL];
-  res.redirect('/urls');
-});
-
-//FOllows from URLS_show on line 24
-//POST // Dynamic Variable associated with edit.
-app.post("/urls/:id/edit", (req, res) => {
-  //gets  variable from req.params
-  //you can console.log req.body to see the params path.
-  
-  let id = req.params.id;
-  const longURL = req.body.longURL;
-  const shortURL = req.params.id;
-  urlDatabase[shortURL] = {
-  'longURL': longURL,
-  'userID': req.params.user_id
-  }
-  //then redirects to homepage.
-  console.log('req.body.longURL --->', req.body.longURL)
-  console.log('databaseid --->', longURL)
-  console.log('params ---->' ,req.params)
-  res.redirect(`/urls`);
-});
-
-
 
 //Client makes a request to Make/Change (POST) information on the register page
 app.post("/urls/register", (req, res) => {
@@ -253,6 +228,51 @@ app.post("/urls/logout", (req, res) => {
   res.redirect('/urls');
 });
 
+//CLient Makes a request to Make or Change Information (PUT)
+app.post("/urls/:shortURL/delete", (req, res) => {
+
+  if (req.cookies.user_id === null || req.cookies.user_id === undefined){
+    return res.redirect('/urls/register')
+  }
+
+  if (urlsForUser(req.cookies.user_id, urlDatabase)) {
+
+
+  //set the variable to the req.params.shorturl
+  let shortURL = req.params.shortURL;
+  //delete the ShortURL from the urlDatabase
+  delete urlDatabase[shortURL];
+  }
+  res.redirect('/urls');
+});
+
+//FOllows from URLS_show on line 24
+//POST // Dynamic Variable associated with edit.
+app.post("/urls/:id", (req, res) => {
+
+  if (req.cookies.user_id === null || req.cookies.user_id === undefined){
+    return res.redirect('/urls/register')
+  }
+
+  if (urlsForUser(req.cookies.user_id, urlDatabase)) {
+
+  //gets  variable from req.params
+  //you can console.log req.body to see the params path.
+  
+  const longURL = req.body.longURL;
+  const shortURL = req.params.id;
+  urlDatabase[shortURL] = {
+  'longURL': longURL,
+  'userID': req.cookies.user_id
+  }
+}
+  //then redirects to homepage.
+  // console.log('req.body.longURL --->', req.body.longURL)
+  // console.log('databaseid --->', longURL)
+  // console.log('params ---->' ,req.params)
+  res.redirect(`/urls`);
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
@@ -286,6 +306,27 @@ const checkPasswordCorrect = (checkPassword, database, res) => {
   return false;
 };
 
-const urlsForUsers = (id) => {
-  
-}
+// const urlsForUsers = (id) => {
+//   let userUrlsObj = {};
+//   for (const element in urlDatabase) {
+//     if (urlDatabase[element].userID === id) {
+//       userUrlsObj[element] = urlDatabase[element];
+//     }
+//   }
+//   return userUrlsObj;
+//}
+
+const urlsForUser = function (id, urlDatabase) {
+  // console.log(id)
+  // console.log(urlDatabase)
+  let userURLs = {};
+  // loop through URL database
+  for (const shortURL in urlDatabase) {
+    // if database user ID equals specific user
+    if (urlDatabase[shortURL].userID === id) {
+      // let key be the short URL and value be shortURL object data
+      userURLs[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return userURLs;
+};

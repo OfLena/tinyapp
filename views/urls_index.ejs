@@ -25,6 +25,9 @@
         </tr>
       </thead>
       <tbody>
+        <% if (!user_id) { %>
+          <a href="/urls/login">Login!</a> or <a href="/urls/register">Register!</a>
+          <% } else { %>
         <% for(let url in urls) { %>
           <tr>
             <td><%= url %></td>
@@ -32,6 +35,7 @@
             <td><form method="GET" action="/urls/<%= url %>"><button type="submit" class="btn btn-warning">EDIT</button></form></form></td>
             <td><form method="POST" action="/urls/<%= url %>/delete"><button type="submit" class="btn btn-danger">Delete</button></form></form></td>
           </tr>
+        <% } %>
         <% } %>
       </tbody>
     </table>
