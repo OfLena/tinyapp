@@ -13,8 +13,7 @@ app.use(cookieParser())
 
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+ 
 };
 
 const users = {};
@@ -34,6 +33,8 @@ app.use((req, res, next) => {
 //client makes a request (GET) for the information on this page.
 //We then res.RENDER the information to the user.
 app.get("/urls/new", (req, res) => {
+
+if (req.cookies.user_id) {
   const templateVars = {
     // userName: req.cookies.userName
     user_id: req.cookies.user_id,
@@ -42,8 +43,10 @@ app.get("/urls/new", (req, res) => {
       ? users[req.cookies["user_id"]].email
       : null
   }
- 
   res.render("urls_new",templateVars);
+} else {
+  res.redirect('/urls')
+}
 });
 
 //Client makes request(GET) for information
@@ -123,11 +126,20 @@ app.get("/u/:shortURL", (req, res) => {
 
 //Client makes a request to Make/Change Information
 app.post("/urls", (req, res) => {
+ 
+///req.cookies.user_id checks all cookies for the relevant id
+///If not logged in and attempting to access the post request it will reject with the else error.
+if (req.cookies.user_id) {
+    let shortURL = generateRandomString();
+    let longURL = req.body.longURL;
+    urlDatabase[shortURL] = longURL;
+    res.redirect('/urls')
+} else {
+  
   // console.log(req.body);  //Log the POST request body to the console
-  let shortURL = generateRandomString();
-  let longURL = req.body.longURL;
-  urlDatabase[shortURL] = longURL;
-  res.redirect('/urls');    
+
+  res.send("YOU SHALL NOT PASS!") 
+  }   
 })
 
 //CLient Makes a request to Make or Change Information (PUT)
@@ -226,6 +238,15 @@ const checkPasswordCorrect = (checkPassword, database, res) => {
   for (const i in database) {
     if (checkPassword === database[i].password) {
       return database[i];
+    }
+  }
+  return false;
+}
+
+const isUserLoggedIn = (checkUser, database, res) => {
+  for (const i in database) {
+    if (checkUser === database[i].id) {
+      return database[i]
     }
   }
   return false;
