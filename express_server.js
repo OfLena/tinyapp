@@ -193,16 +193,18 @@ app.post("/urls/register", (req, res) => {
     let id = generateRandomString();
     let email = req.body.email;
     let password = req.body.password;
+    let hashedPassword = bcrypt.hashSync(password, 10)
     users[id] = {
       id,
       email,
-      password,
+      hashedPassword,
     };
     if (email === '' || password === '') {
       res.send('400 Status Code - Email and/or Password Cannot be Empty');
     }
   }
 
+  console.log('users ---->', users)
 
   res.cookie('user_id', checkEmailExists(req.body.email, users, res).id);
   res.redirect('/urls');
@@ -213,14 +215,28 @@ app.post("/urls/register", (req, res) => {
 //User enters their userName in the login input
 //sets the variable userName to the userName put at login from req.body.userName
 app.post("/urls/login", (req, res) => {
+
+  const hashPassword = checkEmailExists(req.body.email, users, res).hashedPassword
+  const password = req.body.password
+
+  console.log('hashpassword --->', hashPassword)
+
+//  let getPassword = urlsForUser(req.cookies.user_id, urlDatabase)
+
+  // console.log('Should be hashed password ---->' ,password)
+  // let hashedPassword = bcrypt.hashSync(password, 10)
+
   if (checkEmailExists(req.body.email, users, res)  &&
-      checkPasswordCorrect(req.body.password, users, res)) {
+  bcrypt.compareSync(password, hashPassword)) {
     res.cookie('user_id', checkEmailExists(req.body.email, users, res).id);
     res.redirect(`/urls`);
   } else {
     res.send('403 Status Code: Password or Email Address Incorrect');
   }
 });
+
+// checkPasswordCorrect(req.body.password, users, res
+
 
 app.post("/urls/logout", (req, res) => {
   // res.clearCookie('userName', userName)
