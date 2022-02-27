@@ -4,15 +4,10 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
-const res = require("express/lib/response");
-const req = require("express/lib/request");
-const cookieParser = require('cookie-parser');
 
 const {getUserByEmail, urlsForUser, generateRandomString, getUserDatabaseByEmail } = require('./helpers');
 
 app.set("view engine", "ejs");
-
-app.use(cookieParser());
 
 app.use(cookieSession({
   name: 'session',
@@ -140,11 +135,12 @@ app.get("/u/:shortURL", (req, res) => {
   if (req.session.user_id === null || req.session.user_id === undefined) {
     return res.status(400).send('Error: You Must be Logged In');
   }
+  console.log(urlDatabase[req.params.shortURL])
   if (urlDatabase[req.params.shortURL]) {
     const longURL = urlDatabase[req.params.shortURL].longURL;
     res.redirect(longURL);
   } else {
-    return res.status(404).send("This URL Does Not Belong To You");
+    return res.status(404).send("The URL you entered is not in our Database. Please a different URL.");
   }
 });
 
@@ -180,6 +176,8 @@ app.post("/urls", (req, res) => {
 app.post("/urls/register", (req, res) => {
   if (getUserByEmail(req.body.email, users, res)) {
     return res.status(400).send('Email address already exists');
+  } else if (req.body.email === '' || req.body.password === '') {
+    return res.status(400).send('Email and/or Password Cannot be Empty');
   } else {
     let id = generateRandomString();
     let email = req.body.email;
@@ -190,9 +188,6 @@ app.post("/urls/register", (req, res) => {
       email,
       hashedPassword,
     };
-    if (email === '' || password === '') {
-      return res.status(400).send('Email and/or Password Cannot be Empty');
-    }
   }
   req.session.user_id = (getUserByEmail(req.body.email, users, res));
   res.redirect('/urls');
